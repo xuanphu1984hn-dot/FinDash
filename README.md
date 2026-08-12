@@ -6,9 +6,9 @@ Chatbot hỗ trợ, xây dựng bằng Streamlit.
 Toàn bộ dữ liệu lấy qua `yfinance` (không dùng `yahoo_fin` vì thư viện này đã ngừng
 hoạt động do Yahoo Finance đổi cấu trúc trang).
 
-> Project đang trong quá trình xây dựng. Commit này bổ sung lớp `analysis/`
-> (công thức CAPM/APT và Monte Carlo). Phần `tabs/` (giao diện Streamlit) sẽ
-> được bổ sung ở các commit tiếp theo.
+> Project đang trong quá trình xây dựng. Commit này thêm `app.py` (entry point)
+> và 3 tab đầu tiên cho phân tích 1 mã (Summary/Chart/Statistics). Portfolio
+> Analysis, Monte Carlo và Chatbot sẽ được bổ sung ở các commit tiếp theo.
 
 ---
 
@@ -16,56 +16,56 @@ hoạt động do Yahoo Finance đổi cấu trúc trang).
 
 ```
 findash_project/
+├── app.py                      # entry point, chạy: streamlit run app.py
 ├── requirements.txt
 ├── data/
 │   └── data_utils.py           # toàn bộ hàm lấy & định dạng dữ liệu (yfinance)
-└── analysis/
-    ├── capm.py                 # CAPM, APT, Efficient Frontier
-    └── monte_carlo.py          # Monte Carlo cho 1 mã và cả danh mục
+├── analysis/
+│   ├── capm.py                 # CAPM, APT, Efficient Frontier
+│   └── monte_carlo.py          # Monte Carlo cho 1 mã và cả danh mục
+└── tabs/
+    ├── tab_summary.py          # [1] Summary
+    ├── tab_chart.py            # [2] Chart
+    └── tab_statistics.py       # [3] Statistics / Financials / Analysis
 ```
+
+---
+
+## Luồng chính (`app.py`)
+
+`app.py` là entry point (`streamlit run app.py`). Sidebar cho chọn:
+
+- **Ticker**: danh sách ghép từ `POPULAR_EXTRA_TICKERS` (crypto: BTC/ETH/SOL,
+  ETF trái phiếu: TLT/IEF/BND) và `get_sp500_tickers()`. Dropdown hiện tên thân
+  thiện (vd "Bitcoin (BTC-USD)") nhưng giá trị trả về vẫn là ticker chuẩn (vd
+  "BTC-USD"), nên mọi hàm xử lý dữ liệu phía sau dùng chung logic mà không cần
+  phân biệt loại tài sản.
+- **Tab**: Summary, Chart, Statistics, Financials, Analysis (3 tab sau dùng chung
+  module `tab_statistics.py`).
 
 ---
 
 ## `data/data_utils.py` — lớp lấy dữ liệu
 
-Toàn bộ truy vấn `yfinance` tập trung ở đây, có cache (`st.cache_data`, 600s hoặc
-86400s cho danh sách S&P 500) để giảm số lần gọi API.
+Xem chi tiết các hàm `fmt_value`, `get_sp500_tickers`, `POPULAR_EXTRA_TICKERS`,
+`get_summary`, `get_chart_data`, `get_valuation_measures`, `get_financial_highlights`,
+`get_financial_statement`, `get_analysis`... — tất cả có cache (`st.cache_data`)
+và xử lý N/A an toàn.
 
-- **`fmt_value` / `is_valid_ticker_info`**: chuẩn hoá hiển thị (None/NaN → "N/A",
-  format phần trăm / số lớn K-M-B-T / ngày từ timestamp) và phát hiện ticker
-  không hợp lệ (sai mã, đã hủy niêm yết).
-- **`get_sp500_tickers`**: scrape danh sách từ Wikipedia, có fallback nếu lỗi mạng.
-- **`POPULAR_EXTRA_TICKERS`**: mở rộng ngoài cổ phiếu Mỹ — crypto (BTC/ETH/SOL),
-  ETF trái phiếu (TLT/IEF/BND) — để đáp ứng yêu cầu "cổ phiếu/trái phiếu/bitcoin".
-- **Summary/Chart**: `get_summary`, `get_stock_history`, `get_chart_data`,
-  `resample_ohlcv`.
-- **Statistics/Financials/Analysis**: `get_valuation_measures`,
-  `get_financial_highlights`, `get_financial_statement`, `get_analysis`.
-- **Portfolio helpers**: `get_multi_close_prices`, `get_risk_free_rate`
-  (xấp xỉ từ lợi suất trái phiếu Mỹ 10 năm `^TNX`, fallback 4%).
+## `analysis/capm.py` & `analysis/monte_carlo.py`
+
+Đã có sẵn công thức CAPM, APT, Efficient Frontier, Monte Carlo — sẽ được gắn vào
+giao diện ở các tab Portfolio/Monte Carlo (commit tiếp theo).
 
 ---
 
-## `analysis/capm.py` — CAPM, APT, Efficient Frontier
+## `tabs/` — các trang giao diện (hiện tại)
 
-- `compute_returns`: daily return từ giá đóng cửa.
-- `capm_single_stock` / `capm_portfolio`: hồi quy CAPM bằng `statsmodels.OLS`,
-  trả về beta, alpha, expected return, R².
-- `apt_multi_factor`: hồi quy đa nhân tố (APT) — 1 mã theo nhiều factor tuỳ chọn
-  (thị trường, lãi suất, dầu, vàng, USD index).
-- `portfolio_performance`: return/volatility hàng năm cho 1 bộ trọng số.
-- `random_portfolios`: sinh ngẫu nhiên nhiều bộ trọng số để dựng Efficient Frontier.
-
-## `analysis/monte_carlo.py` — mô phỏng Monte Carlo
-
-- `monte_carlo_single_stock`: random walk giá 1 mã dựa trên daily volatility
-  lịch sử (vector hoá bằng numpy).
-- `compute_var`: Value at Risk theo percentile.
-- `monte_carlo_portfolio`: mô phỏng cả danh mục, giữ tương quan giữa các mã bằng
-  phân rã Cholesky trên ma trận hiệp phương sai.
-
-> Công thức chi tiết và giải thích toán học xem trong file báo cáo
-> `FinDash_Bao_Cao_Cong_Thuc.docx` (sẽ đính kèm ở commit cuối).
+| File | Nội dung |
+|---|---|
+| `tab_summary.py` | Bảng thông tin nhanh (`get_summary`) + biểu đồ giá area chart có range selector (1M/3M/6M/YTD/1Y/3Y/5Y/MAX) |
+| `tab_chart.py` | Biểu đồ Line/Candlestick + SMA + Volume, chọn khoảng ngày hoặc period cố định, resample theo ngày/tuần/tháng |
+| `tab_statistics.py` | 3 hàm render riêng: `render_statistics` (Valuation + Financial Highlights), `render_financials` (Income/Balance/Cash Flow theo năm/quý), `render_analysis` (earnings estimate, EPS trend, recommendations...) |
 
 ## Ghi chú kỹ thuật
 
@@ -73,6 +73,3 @@ Toàn bộ truy vấn `yfinance` tập trung ở đây, có cache (`st.cache_dat
   giao diện (`fmt_value()` + `is_valid_ticker_info()`).
 - Nếu muốn hỗ trợ cổ phiếu Việt Nam (HOSE/HNX), Yahoo Finance hỗ trợ rất hạn chế —
   nên cân nhắc bổ sung `vnstock` làm nguồn dữ liệu thứ hai.
-- Monte Carlo có 2 phiên bản độc lập: 1 mã và cả danh mục có tương quan — không
-  dùng chung code vì logic sinh shock ngẫu nhiên khác nhau (đơn biến vs. đa biến
-  qua Cholesky).
