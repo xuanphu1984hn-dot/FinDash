@@ -1,7 +1,7 @@
 import streamlit as st
 
 from data.data_utils import get_sp500_tickers, POPULAR_EXTRA_TICKERS
-from tabs import tab_summary, tab_chart, tab_statistics
+from tabs import tab_summary, tab_chart, tab_statistics, tab_montecarlo
 
 
 st.set_page_config(page_title="FinDash", layout="wide")
@@ -15,12 +15,13 @@ def format_ticker(t):
 
 def main():
     st.sidebar.title("FinDash")
+
     ticker_list = ["-"] + list(POPULAR_EXTRA_TICKERS.keys()) + get_sp500_tickers()
     ticker = st.sidebar.selectbox("Select a ticker", ticker_list, format_func=format_ticker)
 
     select_tab = st.sidebar.radio(
         "Select tab",
-        ["Summary", "Chart", "Statistics", "Financials", "Analysis"],
+        ["Summary", "Chart", "Statistics", "Financials", "Analysis", "Monte Carlo Simulation"],
     )
 
     if select_tab == "Summary":
@@ -33,6 +34,8 @@ def main():
         tab_statistics.render_financials(ticker)
     elif select_tab == "Analysis":
         tab_statistics.render_analysis(ticker)
+    elif select_tab == "Monte Carlo Simulation":
+        tab_montecarlo.render(ticker)
 
 
 if __name__ == "__main__":
