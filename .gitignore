@@ -7,8 +7,7 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Streamlit cache
-.streamlit/
+
 
 # IDE
 .vscode/

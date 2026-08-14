@@ -93,24 +93,8 @@ def get_sp500_tickers():
 # Một danh sách mẫu cho cổ phiếu Việt Nam (Yahoo Finance hỗ trợ hạn chế mã VN,
 # nên đây chỉ là các mã niêm yết ở nước ngoài / ADR hoặc index liên quan).
 # Nếu muốn dữ liệu VN chính xác, khuyến nghị dùng thêm thư viện `vnstock`.
-VN_RELATED_TICKERS = ["VNM", "^VNINDEX"]  # placeholder, tuỳ chỉnh theo nhu cầu
+VN_RELATED_TICKERS = ["VNM", "^VNINDEX"]  
 
-# ----------------------------------------------------------------------
-# NEW: Danh sách mã phổ biến ngoài cổ phiếu Mỹ (crypto & trái phiếu)
-# ----------------------------------------------------------------------
-# Bổ sung để đáp ứng đúng yêu cầu đề bài: "Một cổ phiếu (trái phiếu, bitcoin, etc.)".
-# Dùng dict {ticker: tên hiển thị} để dropdown thân thiện hơn, nhưng giá trị THỰC
-# (key) vẫn là mã ticker hợp lệ mà yfinance hiểu được — mọi hàm phía trên (get_summary,
-# get_chart_data, get_stock_history...) không cần sửa gì, vì chúng chỉ nhận vào 1
-# chuỗi ticker và gọi yfinance giống hệt cách gọi với "AAPL".
-#
-# - BTC-USD, ETH-USD, SOL-USD: giá Bitcoin/Ethereum/Solana theo USD (dữ liệu đầy đủ,
-#   có giá/khối lượng/lịch sử, nhưng sẽ hiện "N/A" ở các chỉ số kiểu công ty như
-#   PE Ratio, EPS — vì tiền mã hoá không có các chỉ số đó. Đây là hành vi ĐÚNG,
-#   không phải lỗi, nhờ cơ chế fmt_value() đã xử lý sẵn ở trên.)
-# - TLT/IEF/BND: các ETF trái phiếu chính phủ Mỹ (20+ năm / 7-10 năm / tổng hợp),
-#   dùng để đại diện cho "trái phiếu" vì đây là tài sản giao dịch thật có đầy đủ
-#   giá/volume — khác với ^TNX (chỉ là chỉ số lợi suất, không phải tài sản để mua bán).
 POPULAR_EXTRA_TICKERS = {
     "BTC-USD": "Bitcoin (BTC-USD)",
     "ETH-USD": "Ethereum (ETH-USD)",
