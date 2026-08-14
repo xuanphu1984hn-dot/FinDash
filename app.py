@@ -1,7 +1,7 @@
 import streamlit as st
 
 from data.data_utils import get_sp500_tickers, POPULAR_EXTRA_TICKERS
-from tabs import tab_summary, tab_chart, tab_statistics, tab_portfolio, tab_montecarlo
+from tabs import tab_summary, tab_chart, tab_statistics, tab_portfolio, tab_montecarlo, tab_chatbot
 
 
 st.set_page_config(page_title="FinDash", layout="wide")
@@ -29,6 +29,7 @@ def main():
             "Analysis",
             "Portfolio Analysis (CAPM/APT)",
             "Monte Carlo Simulation",
+            "Chatbot",
         ],
     )
 
@@ -46,6 +47,8 @@ def main():
         tab_portfolio.render()
     elif select_tab == "Monte Carlo Simulation":
         tab_montecarlo.render(ticker)
+    elif select_tab == "Chatbot":
+        tab_chatbot.render(ticker)
 
 
 if __name__ == "__main__":
